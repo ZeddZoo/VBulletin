@@ -85,90 +85,9 @@ app.get('/', (req, res) => {
     res.statusCode = 418;
     res.write("Board not found :(");
   }
+  res.end();
 });
-
-// const server = http.createServer((req, res) => {
-//   res.setHeader('Access-Control-Allow-Origin', '*');
-//   // res.setHeader('Content-Type', 'text/html');
-//   res.setHeader('Content-Type', 'application/json');
-//   res.statusCode = 200;
-//   // Read Request
-//   var requestBody = [];
-//   console.log(req.url);
-//   console.log("Incoming req.body: " + req.body);
-
-//   // From https://stackoverflow.com/questions/31006711/get-request-body-from-node-jss-http-incomingmessage
-//   // req.on('data', function(chunk) {
-//   //   requestBody += chunk;
-//   // });
-//   // req.on('end', function () {
-//   //   console.log(JSON.parse(jsonString));
-//   // });
-
-//   if (req.method === 'GET') {
-
-//     req.on('data', (chunk) => {
-//       requestBody.push(chunk);
-//     }).on('end', () => {
-//     requestBody = Buffer.concat(requestBody).toString();
-//     // at this point, `body` has the entire request body stored in it as a string
-//     });
-//     console.log("Request body: " + requestBody);
-//     var requestBody = JSON.parse(requestBody);
-
-//     const reqBoardNum = requestBody["board"];
-
-//     const result = boardDict[reqBoardNum];
-
-//     if (result != null) {
-//       var replyBody = {
-//         "boardId": reqBoardNum,
-//         "board": result
-//       };
-//       res.write(JSON.stringify(replyBody));
-//     } else {
-//       res.statusCode = 418;
-//       res.write("Board not found :(");
-//     }
-//   // Write Request
-//   } else if (req.method === 'POST') {
-//     console.log(req);
-//     req.on('data', (chunk) => {
-//       requestBody.push(chunk);
-//     }).on('end', () => {
-//     requestBody = Buffer.concat(requestBody).toString();
-//     // at this point, `body` has the entire request body stored in it as a string
-//     });
-//     console.log("Request body: " + requestBody);
-//     var requestBody = JSON.parse(requestBody);
-
-
-//     const reqBoardNum = requestBody["board"];
-//     const username = requestBody["author"];
-//     var newMessage = requestBody["newMessage"];
-//     newMessage["author"] = username;
-
-
-//     const result = boardDict[reqBoardNum];
-
-//     if (result != null) {
-//       result["board"].append(newMessage);
-//       // https://gyandeeps.com/json-file-write/
-//       res.write("Board Edited successfully :)");
-//     } else {
-//       res.statusCode = 418;
-//       res.write("Board not found :(");
-//     }
-//   }
-
-//   res.end();
-// });
-
-// server.listen(port, hostname, () => {
-//   console.log(`Server running at http://${hostname}:${port}/`);
 
 app.listen(port, hostname, () => {
   console.log(`Server running at http://${hostname}:${port}/`);
 });
-
-// });
