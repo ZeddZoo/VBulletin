@@ -2,10 +2,10 @@
 
 // hardcode demo bulletins
 let bulletins = [
-    {x: 0.1, y:0.1, value:"I am bulletin 1"},
-    {x: 0.5, y:0.75, value:"I am bulletin 2"},
-    {x: 0.75, y:0.4, value:"33333333"}
-]
+    {x: 0.1, y:0.15, value:"I am bulletin 1 tes t tse tase  asdfj0awpao j3poijas"},
+    {x: 0.5, y:0.7, value:"I am bulletin 2 as;dlkfjoi naieonm djioeonma jdjoe"},
+    {x: 0.65, y:0.4, value:"33333333 anmoei nmaoje jeojeo djoej ajodj alsdkjf"}
+];
 
 // throw error
 function error(message) {
@@ -31,14 +31,14 @@ function compileShader(id, type) {
 function buildShaderProgram(shaderInfo) {
     let program = gl.createProgram();
   
-    shaderInfo.forEach(function(desc) {
+    shaderInfo.forEach(desc => {
         let shader = compileShader(desc.id, desc.type);
 
         if (shader) {
             gl.attachShader(program, shader);
         }
     });
-  
+
     gl.linkProgram(program)
   
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
@@ -74,11 +74,11 @@ navigator.mediaDevices.getUserMedia({
         video: {facingMode: "environment"},
         audio: false
     })
-    .then(function(stream) {
+    .then(stream => {
         video.srcObject = stream;
         video.play();
     })
-    .catch(function(err) {
+    .catch(err => {
         error("error while opening camera: " + err)
     });
 let videoBufferCanvas = document.getElementById("videoBuffer");
@@ -91,10 +91,28 @@ let detector = new AR.Detector();
 let canvas = document.getElementById("canvas");
 let bulletinBoardCanvas = document.getElementById("bulletinBoard");
 let bulletinBoard = bulletinBoardCanvas.getContext("2d");
+bulletinBoard.font="bold 30px Courier New";
 var gl = canvas.getContext("webgl");
 if (gl === null) error("Unable to initialise WebGL");
 gl.clearColor(0, 0, 0, 0);
 let background = document.getElementById("background");
+let pin = document.getElementById("pin");
+
+// setup inputs
+var clicked = false;
+var clickedChanged = false;
+canvas.addEventListener("mousedown", e => {
+    clicked = true;
+});
+canvas.addEventListener("mouseup", e => {
+    clicked = false;
+});
+canvas.addEventListener("touchstart", e => {
+    clicked = true;
+})
+canvas.addEventListener("touchend", e => {
+    clicked = false;
+})
 
 // setup shaders
 let shaderProgram = buildShaderProgram([
@@ -144,104 +162,166 @@ function setup() {
         setTimeout(setup, 10);
         return;
     }
-    gl = canvas.getContext("webgl");
     setTimeout(main, 1);
 }
 
-// main function
+function drawBoard() {
+    // buffer
+    let vertexArray = new Float32Array([
+        // 0
+        g0.x, g0.y,
+        // 1
+        g1.x, g1.y,
+        // 2
+        g2.x, g2.y,
+        // 0
+        g0.x, g0.y,
+        // 2
+        g2.x, g2.y,
+        // 3
+        g3.x, g3.y,
+    ]);
+    gl.bufferData(gl.ARRAY_BUFFER, vertexArray, gl.DYNAMIC_DRAW);
+
+    // create bulletin board texture
+    bulletinBoard.drawImage(background, 0, 0);
+    bulletins.forEach(bulletin => {
+        bulletinBoard.fillStyle = "white";
+        bulletinBoard.shadowColor = "black";
+        bulletinBoard.shadowBlur = 15;
+        bulletinBoard.fillRect(
+            bulletin.x * bulletinBoardCanvas.width,
+            bulletin.y * bulletinBoardCanvas.height,
+            0.25 * bulletinBoardCanvas.width,
+            0.25 * bulletinBoardCanvas.height
+        );
+        bulletinBoard.drawImage(pin,
+            (bulletin.x + 0.025) * bulletinBoardCanvas.width,
+            (bulletin.y - 0.05) * bulletinBoardCanvas.height
+        );
+        bulletinBoard.shadowBlur = 0;
+        bulletinBoard.fillStyle = "black";
+        var col = 0;
+        let lines = [];
+        var line = "";
+        for (var ptr = 0; ptr < bulletin.value.length; ptr++) {
+            line += bulletin.value[ptr];
+            if (col > 12 || bulletin.value[ptr] == "\n") {
+                col = 0;
+                lines.push(line);
+                line = "";
+            }
+            col += 1;
+        }
+        lines.push(line);
+
+        var row = 80;
+        lines.forEach(line => {
+            bulletinBoard.fillText(line,
+                10 + bulletin.x * bulletinBoardCanvas.width,
+                row + bulletin.y * bulletinBoardCanvas.height
+            );
+            row += 30;
+        });
+    });
+
+    // bind texture
+    const texture = loadTexture(bulletinBoardCanvas);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+
+    // render
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+    curCount -= 1;
+}
+
+// augmentedReality function
+var state = "AR";
 function main() {
     // clean up previous time
-    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     // move video to buffer canvas
     videoBuffer.drawImage(video, 0, 0, canvas.width, canvas.height);
 
     // find the markers
     let imageData = videoBuffer.getImageData(0, 0, canvas.width, canvas.height);
-    let markers = detector.detect(imageData);
-    if (markers.length > 0) {
-        /* Format:
-         * 0---1
-         * |   |
-         * 3---2
-         */
-        // retrieve marker positions
-        let marker = markers[0];
-        let c0 = marker.corners[0];
-        let c1 = marker.corners[1];
-        let c2 = marker.corners[2];
-        let c3 = marker.corners[3];
+    
+    // AR
+    if (state == "AR") {
+        let markers = detector.detect(imageData);
+        if (markers.length > 0) {
+            /* Format:
+            * 0---1
+            * |   |
+            * 3---2
+            */
+            // retrieve marker positions
+            let marker = markers[0];
+            let c0 = marker.corners[0];
+            let c1 = marker.corners[1];
+            let c2 = marker.corners[2];
+            let c3 = marker.corners[3];
 
-        let center = {
-            x: (c0.x + c1.x + c2.x + c3.x) / 4,
-            y: (c0.y + c1.y + c2.y + c3.y) / 4
-        };
+            let center = {
+                x: (c0.x + c1.x + c2.x + c3.x) / 4,
+                y: (c0.y + c1.y + c2.y + c3.y) / 4
+            };
 
-        // calculate deltas
-        let d0 = {x: c0.x - center.x, y: c0.y - center.y};
-        let d1 = {x: c1.x - center.x, y: c1.y - center.y};
-        let d2 = {x: c2.x - center.x, y: c2.y - center.y};
-        let d3 = {x: c3.x - center.x, y: c3.y - center.y};
+            // calculate deltas
+            let d0 = {x: c0.x - center.x, y: c0.y - center.y};
+            let d1 = {x: c1.x - center.x, y: c1.y - center.y};
+            let d2 = {x: c2.x - center.x, y: c2.y - center.y};
+            let d3 = {x: c3.x - center.x, y: c3.y - center.y};
 
-        // convert to gl positions
-        let scale = {x:5, y:5};
-        g0 = filter(g0, {
-            x: 2 * (scale.x * d0.x + center.x) / canvas.width - 1,
-            y: -2 * (scale.y * d0.y + center.y) / canvas.height + 1,
-        });
-        g1 = filter(g1, {
-            x: 2 * (scale.x * d1.x + center.x) / canvas.width - 1,
-            y: -2 * (scale.y * d1.y + center.y) / canvas.height + 1,
-        });
-        g2 = filter(g2, {
-            x: 2 * (scale.x * d2.x + center.x) / canvas.width - 1,
-            y: -2 * (scale.y * d2.y + center.y) / canvas.height + 1,
-        });
-        g3 = filter(g3, {
-            x: 2 * (scale.x * d3.x + center.x) / canvas.width - 1,
-            y: -2 * (scale.y * d3.y + center.y) / canvas.height + 1,
-        });
+            // convert to gl positions
+            let scale = {x:7, y:7};
+            g0 = filter(g0, {
+                x: 2 * (scale.x * d0.x + center.x) / canvas.width - 1,
+                y: -2 * (scale.y * d0.y + center.y) / canvas.height + 1,
+            });
+            g1 = filter(g1, {
+                x: 2 * (scale.x * d1.x + center.x) / canvas.width - 1,
+                y: -2 * (scale.y * d1.y + center.y) / canvas.height + 1,
+            });
+            g2 = filter(g2, {
+                x: 2 * (scale.x * d2.x + center.x) / canvas.width - 1,
+                y: -2 * (scale.y * d2.y + center.y) / canvas.height + 1,
+            });
+            g3 = filter(g3, {
+                x: 2 * (scale.x * d3.x + center.x) / canvas.width - 1,
+                y: -2 * (scale.y * d3.y + center.y) / canvas.height + 1,
+            });
 
-        // set sustained count
-        curCount = maxCount;
+            // set sustained count
+            curCount = maxCount;
+        }
+
+        //render
+        if (curCount > 0) {
+            drawBoard();
+            if (clicked) {
+                if (!clickedChanged) {
+                    state = "BOARD";
+                    clickedChanged = true;
+                }
+            }
+            else clickedChanged = false;
+        }
     }
-
-    //render
-    if (curCount > 0) {
-        // buffer
-        let vertexArray = new Float32Array([
-            // 0
-            g0.x, g0.y,
-            // 1
-            g1.x, g1.y,
-            // 2
-            g2.x, g2.y,
-            // 0
-            g0.x, g0.y,
-            // 2
-            g2.x, g2.y,
-            // 3
-            g3.x, g3.y,
-        ]);
-        gl.bufferData(gl.ARRAY_BUFFER, vertexArray, gl.DYNAMIC_DRAW);
-
-        // create bulletin board texture
-        bulletinBoard.drawImage(background, 0, 0);
-        bulletins.forEach(function(bulletin) {
-            bulletinBoard.fillStyle = "white";
-            bulletinBoard.fillRect(
-                bulletin.x * bulletinBoardCanvas.width,
-                bulletin.y * bulletinBoardCanvas.height,
-                0.2 * bulletinBoardCanvas.width,
-                0.2 * bulletinBoardCanvas.height
-            );
-        })
-        const texture = loadTexture(bulletinBoardCanvas);
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-
-        // render
-        gl.drawArrays(gl.TRIANGLES, 0, 6);
-        curCount -= 1;
+    // BOARD
+    else {
+        g0 = filter(g0, {x:-1, y: 1});
+        g1 = filter(g1, {x: 1, y: 1});
+        g2 = filter(g2, {x: 1, y:-1});
+        g3 = filter(g3, {x:-1, y:-1});
+        drawBoard();
+        if (clicked) {
+            if (!clickedChanged) {
+                state = "AR";
+                clickedChanged = true;
+            }
+        }
+        else clickedChanged = false;
     }
     setTimeout(main, 1);
 }
