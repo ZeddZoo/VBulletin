@@ -24,14 +24,18 @@ app.options('*', function(req, res) {
 
 var boardDict = {};
 
+var authorToMessageMap = new Map();
+
 var board1 = {
   board: 1,
   bulletinList: [
     {
+      id: 1,
       content: ["hello world"],
       author: "foobar"
     },
     {
+      id: 2,
       content: ["Wello Horld"],
       author: "barfoo"
     }
@@ -39,6 +43,8 @@ var board1 = {
   locationId: [40.444898, -79.945491], // Lat-Lng
   institution: "Marnegie Cellon"
 };
+
+var messageCountForId = board1["bulletinList"].length + 1;
 
 boardDict[1] = board1;
 // boardDict.push({
@@ -54,8 +60,16 @@ app.post('/', (req, res) => {
   const author = req.body.author;
   var newMessage = req.body.newMessage;
   newMessage["author"] = author;
+  newMessage["id"] = messageCountForId++;
 
   const result = boardDict[reqBoardNum];
+
+  if (authorToMessageMap.get(author) != undefined) {
+    authorToMessageMap.get(author).append(newMessage);
+  } else {
+    authorToMessageMap[author] = [newMessage];
+  }
+
 
   if (result != null) {
     result["bulletinList"].push(newMessage);
