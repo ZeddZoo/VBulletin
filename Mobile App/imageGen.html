@@ -1,5 +1,5 @@
-<canvas id="myCanvas" width="5400" height="7200" style="border:1px solid #d3d3d3;">
-Your browser does not support the HTML5 canvas tag.</canvas>
+<canvas id="myCanvas" width="1080" height="1620" style="border:1px solid #d3d3d3;">
+    Your browser does not support the HTML5 canvas tag.</canvas>
 
 <script>
 
@@ -13,13 +13,30 @@ Your browser does not support the HTML5 canvas tag.</canvas>
 //     }
 
 // var text = messageData.text;
-var text = "hello world";
+
+var text = "hello worldgowi[vpi[opiv[wpi[vpowier[opivwerjej;vsiut[qwpi[v9ivt3utp430u5v-3045vwrv-0934riwuvtwpriu[v30945-v093248v-902384-v2903849pviw[rvpi";
 
 var c=document.getElementById("myCanvas");
 var ctx=c.getContext("2d");
-ctx.font="200px Arial";
-ctx.fillText(text,2700, 3600);
+ctx.font="70px Lucida Console";
+
+var charsInLine = 23;
+var sliceFirst = 0;
+var sliceLast = sliceFirst + charsInLine;
+
+var verticalOffset = 80;
+
+while(sliceFirst < text.length){
+    var slicedText = text.slice(sliceFirst, sliceLast);
+    ctx.fillText(slicedText, 45, verticalOffset);
+    sliceFirst = sliceLast + 1;
+    sliceLast = sliceFirst + charsInLine;
+    verticalOffset += 80;
+}
+
+//14 characters per line, 1460px height
 
 // save img
-Canvas2Image.saveAsImage(c, 5400, 7200, 'png');
+// Canvas2Image.saveAsImage(c, 1080, 1620, 'png');
+
 </script>
