@@ -81,5 +81,3 @@ server.listen(port, hostname, () => {
   clientCount++;
 
 });
-
-// const getBulletin = (bulletinId) =>
