@@ -26,7 +26,7 @@ const server = http.createServer((req, res) => {
     //   console.log("Getting board: " + jsonRequest);
     // })();
 
-    const result = fs.readFile('student.json', (err, data) => {
+    const result = fs.readFile(jsonRequest, (err, data) => {
       if (err) throw err;
       let student = JSON.parse(data);
       console.log(student);
@@ -54,7 +54,7 @@ const server = http.createServer((req, res) => {
     //   console.log("Getting board: " + jsonRequest);
     // })();
 
-    const result = fs.readFile('student.json', (err, data) => {
+    const result = fs.readFile(jsonRequest, (err, data) => {
       if (err) throw err;
       let student = JSON.parse(data);
       console.log(student);

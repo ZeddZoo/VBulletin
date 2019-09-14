@@ -4,11 +4,11 @@ const fs = require('fs');
 const reqDest = '127.0.0.1';
 const request = require('request');
 
-request(reqDest, { json: true }, (err, res, body) => {
-  if (err) { return console.log(err); }
-  console.log(body.url);
-  console.log(body.explanation);
-});
+// request(reqDest, { json: true }, (err, res, body) => {
+//   if (err) { return console.log(err); }
+//   console.log(body.url);
+//   console.log(body.explanation);
+// });
 
 function getReadRequest(boardId, author) {
   return '{"board": ' + boardId + ', "author": ' + author + '}';
@@ -16,6 +16,7 @@ function getReadRequest(boardId, author) {
 
 // This request function needs boardId and author to be already defined
 request({
+  json: true,
   method: 'GET',
   uri: 'reqDest',
   multipart: [
@@ -27,7 +28,7 @@ request({
 },
 function (error, response, body) {
   if (error) {
-    return console.error('upload failed:', error);
+    return console.error('download failed:', error);
   }
   console.log('Upload successful!  Server responded with:', body);
-})
+});
