@@ -360,8 +360,8 @@ function main() {
 
         // add buttons
         bulletinBoard.shadowBlur = 15;
-        bulletinBoard.fillStyle = "green";
-        bulletinBoard.fillRect(50, 1400, 250, 150);
+        // bulletinBoard.fillStyle = "green";
+        // bulletinBoard.fillRect(50, 1400, 250, 150);
         bulletinBoard.fillStyle = "red";
         bulletinBoard.fillRect(780, 1400, 250, 150);
 
@@ -369,7 +369,7 @@ function main() {
         bulletinBoard.shadowBlur = 0;
         bulletinBoard.fillStyle = "black"
         bulletinBoard.font="bold 100px Courier New";
-        bulletinBoard.fillText("ADD", 78, 1505);
+        // bulletinBoard.fillText("ADD", 78, 1505);
         bulletinBoard.fillText("EXIT", 783, 1505);
 
         // bind texture
@@ -385,11 +385,11 @@ function main() {
             if (!clickedChanged) {
                 if (clickedPos.x > 50 && clickedPos.x < 50 + 250 &&
                     clickedPos.y > 1400 && clickedPos.y < 1400 + 150) {
-                    bulletins.push({
-                        x: Math.max(Math.min(Math.random() % 800)),
-                        y: Math.max(Math.min(Math.random() % 800)),
-                        value: ""
-                    });
+                    // bulletins.push({
+                    //     x: Math.random() * 800 + 50,
+                    //     y: Math.random() * 800 + 150,
+                    //     value: ""
+                    // });
                 } else if (clickedPos.x > 780 && clickedPos.x < 780 + 250 &&
                     clickedPos.y > 1400 && clickedPos.y < 1400 + 150) {
                     state = "AR";
