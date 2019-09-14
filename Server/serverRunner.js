@@ -22,8 +22,14 @@ const server = http.createServer((req, res) => {
 
     const jsonRequest = "Boards/" + "board" + reqBoardNum + ".json";
 
-    var result = $.getJSON(jsonRequest, () => {
-      console.log("Getting board: " + jsonRequest);
+    // var result = $.getJSON(jsonRequest, () => {
+    //   console.log("Getting board: " + jsonRequest);
+    // })();
+
+    const result = fs.readFile('student.json', (err, data) => {
+      if (err) throw err;
+      let student = JSON.parse(data);
+      console.log(student);
     })();
 
     if (result != null) {
@@ -44,8 +50,14 @@ const server = http.createServer((req, res) => {
 
     const jsonRequest = "Boards/" + "board" + reqBoardNum + ".json";
 
-    var result = $.getJSON(jsonRequest, () => {
-      console.log("Getting board: " + jsonRequest);
+    // var result = $.getJSON(jsonRequest, () => {
+    //   console.log("Getting board: " + jsonRequest);
+    // })();
+
+    const result = fs.readFile('student.json', (err, data) => {
+      if (err) throw err;
+      let student = JSON.parse(data);
+      console.log(student);
     })();
 
     if (result != null) {
