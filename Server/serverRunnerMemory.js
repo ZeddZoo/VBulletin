@@ -1,19 +1,41 @@
 const http = require('http');
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+var app = express();
+// var jsonParer = bodyParser.json();
 const hostname = '127.0.0.1';
 const port = 3000;
 
-var clientCount = 0;
+app.use(
+  bodyParser.urlencoded({
+    extended: true
+  })
+)
+app.use(bodyParser.json());
+app.use(cors());
+
+app.options('*', function(req, res) {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Credentials', true);
+  res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  return res.header('Access-Control-Allow-Headers', 'Content-Type');
+});
 
 var boardDict = {};
+
+var authorToMessageMap = new Map();
 
 var board1 = {
   board: 1,
   bulletinList: [
     {
+      id: 1,
       content: ["hello world"],
       author: "foobar"
     },
     {
+      id: 2,
       content: ["Wello Horld"],
       author: "barfoo"
     }
@@ -22,64 +44,64 @@ var board1 = {
   institution: "Marnegie Cellon"
 };
 
-boardDict.push({
-    key: 1,
-    value: board1
-});
+var messageCountForId = board1["bulletinList"].length + 1;
 
-const server = http.createServer((req, res) => {
-  res.statusCode = 200;
-  // Read Request
-  var requestBody = "";
-  // From https://stackoverflow.com/questions/31006711/get-request-body-from-node-jss-http-incomingmessage
-  req.on('readable', () => {
-    requestBody += req.read();
-  });
+boardDict[1] = board1;
+// boardDict.push({
+//     key: 1,
+//     value: board1
+// });
 
-  var requestBody = JSON.parse(requestBody);
+app.post('/', (req, res) => {
+  console.log("Request body: " + req.body);
+  console.log("Previous board state:" + JSON.stringify(board1));
 
-  if (req.method === 'GET') {
-    const reqBoardNum = requestBody["board"];
+  const reqBoardNum = req.body.board;
+  const author = req.body.author;
+  var newMessage = req.body.newMessage;
+  newMessage["author"] = author;
+  newMessage["id"] = messageCountForId++;
 
-    const result = boardDict[reqBoardNum];
+  const result = boardDict[reqBoardNum];
 
-    if (result != null) {
-      var replyBody = {
-        "boardId": reqBoardNum,
-        "board": result
-      };
-      res.write(JSON.stringify(replyBody));
-    } else {
-      res.statusCode = 418;
-      res.write("Board not found :(");
-    }
-  // Write Request
-  } else if (req.method === 'POST') {
-    const reqBoardNum = requestBody["board"];
-    const username = requestBody["author"];
-    var newMessage = requestBody["newMessage"];
-    newMessage["author"] = username;
-
-
-    const result = boardDict[reqBoardNum];
-
-    if (result != null) {
-      result["board"].append(newMessage);
-      // https://gyandeeps.com/json-file-write/
-      res.write("Board Edited successfully :)");
-    } else {
-      res.statusCode = 418;
-      res.write("Board not found :(");
-    }
+  if (authorToMessageMap.get(author) != undefined) {
+    authorToMessageMap.get(author).append(newMessage);
+  } else {
+    authorToMessageMap[author] = [newMessage];
   }
 
+
+  if (result != null) {
+    result["bulletinList"].push(newMessage);
+    res.write(JSON.stringify(result));
+  } else {
+    res.statusCode = 418;
+    res.write("Board not found :(");
+  }
+  console.log("Current board state:" + JSON.stringify(board1));
   res.end();
 });
 
-server.listen(port, hostname, () => {
-  console.log(`Server running at http://${hostname}:${port}/`);
-  clientCount++;
+app.get('/', (req, res) => {
+  console.log("Request body: " + req.body);
 
+  const reqBoardNum = req.body.board;
+
+  const result = boardDict[reqBoardNum];
+
+  if (result != null) {
+    var replyBody = {
+      "boardId": reqBoardNum,
+      "board": result
+    };
+    res.write(JSON.stringify(replyBody));
+  } else {
+    res.statusCode = 418;
+    res.write("Board not found :(");
+  }
+  res.end();
 });
 
-// const getBulletin = (bulletinId) =>
+app.listen(port, hostname, () => {
+  console.log(`Server running at http://${hostname}:${port}/`);
+});

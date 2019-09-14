@@ -1,7 +1,7 @@
 {
-  "QR String": "",
-  "BulletinList": [{
-    "Contents": "",
-    "Author": "Joe"
+  "bulletinList": [{
+    "id": 1,
+    "contents": "",
+    "author": "Joe"
   }]
 }
