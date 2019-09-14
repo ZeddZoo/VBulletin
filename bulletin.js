@@ -267,7 +267,7 @@ function drawBoard() {
 }
 
 // augmentedReality function
-var state = "BOARD";
+var state = "AR";
 function main() {
     // clean up previous time
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
