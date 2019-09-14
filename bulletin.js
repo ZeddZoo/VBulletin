@@ -1,10 +1,45 @@
 "use strict"
 
+// connect to server
+var messageObj = {
+    board: 1, //TODO: get board number variable
+    author: "Ben",
+    newMessage: "Test pasdfnjkopijofadshuibjoaerwhpuiofeasuiofsdahbjkweafhi"
+}
+
+// const request = new Request("http://128.237.175.221:80/", {
+//     method: 'POST',
+//     body: JSON.stringify(messageObj),
+//     credentials: "include"
+// });
+
+// fetch(request)
+//     .then(response => {
+//         console.log("request sent")
+//         if (response.status === 200) {
+//             return response.json();
+//         } else {
+//             throw new Error('Something went wrong on api server!');
+//         }
+//     })
+//     .then(response => {
+//         console.log("response:", response);
+//     }).catch(error => {
+//         console.log(error);
+//     });
+
+// function a() {
+// var xhr = new XMLHttpRequest();
+// xhr.open("POST", "https://128.237.175.221:8443", true);
+// xhr.send(messageObj);}
+
+// setTimeout(a, 100);
+
 // hardcode demo bulletins
 let bulletins = [
-    {x: 0.1, y:0.15, value:"I am bulletin 1 tes t tse tase  asdfj0awpao j3poijas"},
-    {x: 0.5, y:0.7, value:"I am bulletin 2 as;dlkfjoi naieonm djioeonma jdjoe"},
-    {x: 0.65, y:0.4, value:"33333333 anmoei nmaoje jeojeo djoej ajodj alsdkjf"}
+    {x:100, y:190, value:"Food Club\n- free food\n- life skill"},
+    {x:500, y:900, value:"Concert\n- 9:00 pm\n- Friday 13th"},
+    {x:650, y:450, value:"Test note\ntest test test\n\ntest test test\n\ntest test test"}
 ];
 
 // throw error
@@ -91,7 +126,6 @@ let detector = new AR.Detector();
 let canvas = document.getElementById("canvas");
 let bulletinBoardCanvas = document.getElementById("bulletinBoard");
 let bulletinBoard = bulletinBoardCanvas.getContext("2d");
-bulletinBoard.font="bold 30px Courier New";
 var gl = canvas.getContext("webgl");
 if (gl === null) error("Unable to initialise WebGL");
 gl.clearColor(0, 0, 0, 0);
@@ -100,15 +134,20 @@ let pin = document.getElementById("pin");
 
 // setup inputs
 var clicked = false;
+var clickedPos = {x:0, y:0};
 var clickedChanged = false;
 canvas.addEventListener("mousedown", e => {
     clicked = true;
+    clickedPos.x = e.clientX;
+    clickedPos.y = e.clientY;
 });
 canvas.addEventListener("mouseup", e => {
     clicked = false;
 });
 canvas.addEventListener("touchstart", e => {
     clicked = true;
+    clickedPos.x = e.touches[0].clientX;
+    clickedPos.y = e.touches[0].clientY;
 })
 canvas.addEventListener("touchend", e => {
     clicked = false;
@@ -184,20 +223,21 @@ function drawBoard() {
     gl.bufferData(gl.ARRAY_BUFFER, vertexArray, gl.DYNAMIC_DRAW);
 
     // create bulletin board texture
+    bulletinBoard.font="bold 31px Courier New";
     bulletinBoard.drawImage(background, 0, 0);
     bulletins.forEach(bulletin => {
         bulletinBoard.fillStyle = "white";
         bulletinBoard.shadowColor = "black";
         bulletinBoard.shadowBlur = 15;
         bulletinBoard.fillRect(
-            bulletin.x * bulletinBoardCanvas.width,
-            bulletin.y * bulletinBoardCanvas.height,
-            0.25 * bulletinBoardCanvas.width,
-            0.25 * bulletinBoardCanvas.height
+            bulletin.x,
+            bulletin.y,
+            300,
+            300
         );
         bulletinBoard.drawImage(pin,
-            (bulletin.x + 0.025) * bulletinBoardCanvas.width,
-            (bulletin.y - 0.05) * bulletinBoardCanvas.height
+            bulletin.x + 25,
+            bulletin.y - 75
         );
         bulletinBoard.shadowBlur = 0;
         bulletinBoard.fillStyle = "black";
@@ -206,7 +246,7 @@ function drawBoard() {
         var line = "";
         for (var ptr = 0; ptr < bulletin.value.length; ptr++) {
             line += bulletin.value[ptr];
-            if (col > 12 || bulletin.value[ptr] == "\n") {
+            if (col > 13 || bulletin.value[ptr] == "\n") {
                 col = 0;
                 lines.push(line);
                 line = "";
@@ -218,24 +258,16 @@ function drawBoard() {
         var row = 80;
         lines.forEach(line => {
             bulletinBoard.fillText(line,
-                10 + bulletin.x * bulletinBoardCanvas.width,
-                row + bulletin.y * bulletinBoardCanvas.height
+                10 + bulletin.x,
+                row + bulletin.y
             );
             row += 30;
         });
     });
-
-    // bind texture
-    const texture = loadTexture(bulletinBoardCanvas);
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-
-    // render
-    gl.drawArrays(gl.TRIANGLES, 0, 6);
-    curCount -= 1;
 }
 
 // augmentedReality function
-var state = "AR";
+var state = "BOARD";
 function main() {
     // clean up previous time
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -299,6 +331,16 @@ function main() {
         //render
         if (curCount > 0) {
             drawBoard();
+            
+            // bind texture
+            const texture = loadTexture(bulletinBoardCanvas);
+            gl.bindTexture(gl.TEXTURE_2D, texture);
+
+            // render
+            gl.drawArrays(gl.TRIANGLES, 0, 6);
+            curCount -= 1;
+
+            // check switch
             if (clicked) {
                 if (!clickedChanged) {
                     state = "BOARD";
@@ -315,9 +357,51 @@ function main() {
         g2 = filter(g2, {x: 1, y:-1});
         g3 = filter(g3, {x:-1, y:-1});
         drawBoard();
+
+        // add buttons
+        bulletinBoard.shadowBlur = 15;
+        bulletinBoard.fillStyle = "green";
+        bulletinBoard.fillRect(50, 1400, 250, 150);
+        bulletinBoard.fillStyle = "red";
+        bulletinBoard.fillRect(780, 1400, 250, 150);
+
+        // add button text
+        bulletinBoard.shadowBlur = 0;
+        bulletinBoard.fillStyle = "black"
+        bulletinBoard.font="bold 100px Courier New";
+        bulletinBoard.fillText("ADD", 78, 1505);
+        bulletinBoard.fillText("EXIT", 783, 1505);
+
+        // bind texture
+        const texture = loadTexture(bulletinBoardCanvas);
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+
+        // render
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+        curCount -= 1;
+
+        // check switch
         if (clicked) {
             if (!clickedChanged) {
-                state = "AR";
+                if (clickedPos.x > 50 && clickedPos.x < 50 + 250 &&
+                    clickedPos.y > 1400 && clickedPos.y < 1400 + 150) {
+                    bulletins.push({
+                        x: Math.max(Math.min(Math.random() % 800)),
+                        y: Math.max(Math.min(Math.random() % 800)),
+                        value: ""
+                    });
+                } else if (clickedPos.x > 780 && clickedPos.x < 780 + 250 &&
+                    clickedPos.y > 1400 && clickedPos.y < 1400 + 150) {
+                    state = "AR";
+                }
+                else {
+                    bulletins.forEach(bulletin => {
+                        if (clickedPos.x > bulletin.x && clickedPos.x < bulletin.x + 300 &&
+                            clickedPos.y > bulletin.y && clickedPos.y < bulletin.y + 300) {
+                            console.log(bulletin.value);
+                        }
+                    });
+                }
                 clickedChanged = true;
             }
         }

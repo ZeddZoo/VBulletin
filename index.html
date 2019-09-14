@@ -3,11 +3,12 @@
 <head>
 <meta charset="utf-8">
 <title>Virtual Bulletin</title>
+<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests"> 
 </head>
 <body>
 	<header><h1>Loading ...</h1></header>
 	<video id="video" style="visibility: hidden"></video>
-	<canvas id="videoBuffer"
+	<canvas id="videoBuffer" width=480 height=640
 		style="width:100%;height:100%;position:absolute;top:0px;left:0px;"
 	></canvas>
 	<canvas id="canvas" width=480 height=640
