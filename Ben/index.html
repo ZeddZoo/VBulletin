@@ -14,21 +14,28 @@
 	<canvas id="canvas" width=480 height=640
 		style="width:100%;height:100%;position:absolute;top:0px;left:0px;"
 	></canvas>
-	<canvas id="bulletin" style="visibility: hidden" width=800px height=600px></canvas>
+	<canvas id="bulletinBoard" style="visibility: hidden" width=800px height=1080px></canvas>
+	<image id="background" src="background.jpg"
+		style="visibility: hidden;position:absolute;top:0px;left:0px;"
+	></image>
 	<script src="lib/cv.js" type="text/javascript"></script>
 	<script src="lib/aruco.js" type="text/javascript"></script>
 	<script id="vertexShader" type="x-shader/x-vertex">
-		attribute vec2 vertexPosition;
+		attribute vec2 vertexPositions;
+		attribute vec2 textureCoordinates;
+		varying highp vec2 vTextureCoordinates;
 		void main() {
-			gl_Position = vec4(vertexPosition, 0.0, 1.0);
+			gl_Position = vec4(vertexPositions, 0.0, 1.0);
+			vTextureCoordinates = textureCoordinates;
 		}
 	</script>
 	<script id="fragmentShader" type="x-shader/x-fragment">
-		#ifdef GL_ES
-			precision highp float;
-		#endif
-		void main() {
-			gl_FragColor = vec4(1, 0, 0, 1);
+		varying highp vec2 vTextureCoordinates;
+
+		uniform sampler2D uTexture;
+
+		void main(void) {
+			gl_FragColor = texture2D(uTexture, vTextureCoordinates);
 		}
 	  </script>
 	<script src="bulletin.js" type="text/javascript"></script>
