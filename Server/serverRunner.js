@@ -17,10 +17,10 @@ const server = http.createServer((req, res) => {
   var requestBody = JSON.parse(requestBody);
 
   if (req.method === 'GET') {
-    const reqBoardNum = requestBody[board];
-    const username = requestBody[username];
+    const reqBoardNum = requestBody["board"];
+    const username = requestBody["author"];
 
-    const jsonRequest = "Boards/" + "board" + reqBoardNum + ".JSON";
+    const jsonRequest = "Boards/" + "board" + reqBoardNum + ".json";
 
     var result = $.getJSON(jsonRequest, () => {
       console.log("Getting board: " + jsonRequest);
@@ -36,10 +36,33 @@ const server = http.createServer((req, res) => {
       res.statusCode = 418;
       res.write("Board not found :(");
     }
-
   // Write Request
   } else if (req.method === 'POST') {
+    const reqBoardNum = requestBody["board"];
+    const username = requestBody["author"];
+    const newMessage = requestBody["newMessage"];
 
+    const jsonRequest = "Boards/" + "board" + reqBoardNum + ".json";
+
+    var result = $.getJSON(jsonRequest, () => {
+      console.log("Getting board: " + jsonRequest);
+    })();
+
+    if (result != null) {
+      result["board"].append(newMessage);
+      // https://gyandeeps.com/json-file-write/
+      fs.writeFile(jsonRequest, JSON.stringify(result), (err) => {
+        if (err) {
+            console.error(err);
+            return;
+        };
+        console.log("File has been created");
+      });
+      res.write("Board Edited successfully :)");
+    } else {
+      res.statusCode = 418;
+      res.write("Board not found :(");
+    }
   }
   // res.setHeader('Content-Type', 'text/plain');
   // res.write("Welcome to the VBulletin server!\n");
