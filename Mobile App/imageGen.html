@@ -1,0 +1,42 @@
+<canvas id="myCanvas" width="1080" height="1620" style="border:1px solid #d3d3d3;">
+    Your browser does not support the HTML5 canvas tag.</canvas>
+
+<script>
+
+//import JSON file
+
+// var messageData = JSON.parse(message);
+// if (messageData.ID === undefined 
+//    || messageData.Author === undefined 
+//    || messageData.text === undefined){
+//         //raise exception?
+//     }
+
+// var text = messageData.text;
+
+var text = "hello worldgowi[vpi[opiv[wpi[vpowier[opivwerjej;vsiut[qwpi[v9ivt3utp430u5v-3045vwrv-0934riwuvtwpriu[v30945-v093248v-902384-v2903849pviw[rvpi";
+
+var c=document.getElementById("myCanvas");
+var ctx=c.getContext("2d");
+ctx.font="70px Lucida Console";
+
+var charsInLine = 23;
+var sliceFirst = 0;
+var sliceLast = sliceFirst + charsInLine;
+
+var verticalOffset = 80;
+
+while(sliceFirst < text.length){
+    var slicedText = text.slice(sliceFirst, sliceLast);
+    ctx.fillText(slicedText, 45, verticalOffset);
+    sliceFirst = sliceLast + 1;
+    sliceLast = sliceFirst + charsInLine;
+    verticalOffset += 80;
+}
+
+//14 characters per line, 1460px height
+
+// save img
+// Canvas2Image.saveAsImage(c, 1080, 1620, 'png');
+
+</script>
